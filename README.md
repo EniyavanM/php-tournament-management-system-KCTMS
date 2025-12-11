@@ -56,6 +56,7 @@ Includes:
 3. Import DB  
 4. Configure `conn_db.php`  
 5. Run via `http://localhost/KCTMS`
+6. http://localhost/phpmyadmin use this to access mysql db.
 
 ## 🚀 Future Enhancements
 - Admin dashboard  
