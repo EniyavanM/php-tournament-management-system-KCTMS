@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+    <?php 
+        session_start(); 
+        include("../conn_db.php"); 
+        include('../head.php');
+        if($_SESSION["utype"]!="ADMIN"){
+            header("location: ../restricted.php");
+            exit(1);
+        }
+    ?>
+    <meta charset="UTF-8">
+     
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../img/Color Icon with background.png" rel="icon">
+    <link href="../css/main.css" rel="stylesheet">
+    <title>Players List | KCT</title>
+</head>
+
+<body class="d-flex flex-column h-100">
+
+    <?php include('nav_header_admin.php')?>
+
+    <div class="container p-2 pb-0" id="admin-dashboard">
+        <div class="mt-4 border-bottom">
+            <a class="nav nav-item text-decoration-none text-muted mb-2" href="#" onclick="history.back();">
+                <i class="bi bi-arrow-left-square me-2"></i>Go back
+            </a>
+
+            <?php
+            if(isset($_GET["up_prf"])){
+                if($_GET["up_prf"]==1){
+                    ?>
+            <!-- START SUCCESSFULLY UPDATE PROFILE -->
+            <div class="row row-cols-1 notibar">
+                <div class="col mt-2 ms-2 p-2 bg-success text-white rounded text-start">
+                    <i class="bi bi-check-circle ms-2"></i>
+                    <span class="ms-2 mt-2">Successfully updated player profile.</span>
+                    <span class="me-2 float-end"><a class="text-decoration-none link-light" href="admin_ply_list.php">X</a></span>
+                </div>
+            </div>
+            <!-- END SUCCESSFULLY UPDATE PROFILE -->
+            <?php }else{ ?>
+            <!-- START FAILED UPDATE PROFILE -->
+            <div class="row row-cols-1 notibar">
+                <div class="col mt-2 ms-2 p-2 bg-danger text-white rounded text-start">
+                    <i class="bi bi-x-circle ms-2"></i><span class="ms-2 mt-2">Failed to update player profile.</span>
+                    <span class="me-2 float-end"><a class="text-decoration-none link-light" href="admin_ply_list.php">X</a></span>
+                </div>
+            </div>
+            <!-- END FAILED UPDATE PROFILE -->
+            <?php }
+                }
+            if(isset($_GET["del_cst"])){
+                if($_GET["del_cst"]==1){
+                    ?>
+            <!-- START SUCCESSFULLY DELETE PROFILE -->
+            <div class="row row-cols-1 notibar">
+                <div class="col mt-2 ms-2 p-2 bg-success text-white rounded text-start">
+                    <i class="bi bi-check-circle ms-2"></i>
+                    <span class="ms-2 mt-2">Successfully deleted player profile.</span>
+                    <span class="me-2 float-end"><a class="text-decoration-none link-light" href="admin_ply_list.php">X</a></span>
+                </div>
+            </div>
+            <!-- END SUCCESSFULLY DELETE PROFILE -->
+            <?php }else{ ?>
+            <!-- START FAILED DELETE PROFILE -->
+            <div class="row row-cols-1 notibar">
+                <div class="col mt-2 ms-2 p-2 bg-danger text-white rounded text-start">
+                    <i class="bi bi-x-circle ms-2"></i><span class="ms-2 mt-2">Failed to delete player profile.</span>
+                    <span class="me-2 float-end"><a class="text-decoration-none link-light" href="admin_ply_list.php">X</a></span>
+                </div>
+            </div>
+            <!-- END FAILED DELETE PROFILE -->
+            <?php }
+                }
+            if(isset($_GET["add_cst"])){
+                if($_GET["add_cst"]==1){
+                    ?>
+            <!-- START SUCCESSFULLY ADD PROFILE -->
+            <div class="row row-cols-1 notibar">
+                <div class="col mt-2 ms-2 p-2 bg-success text-white rounded text-start">
+                    <i class="bi bi-check-circle ms-2"></i>
+                    <span class="ms-2 mt-2">Successfully add new player profile.</span>
+                    <span class="me-2 float-end"><a class="text-decoration-none link-light" href="admin_ply_list.php">X</a></span>
+                </div>
+            </div>
+            <!-- END SUCCESSFULLY ADD PROFILE -->
+            <?php }else{ ?>
+            <!-- START FAILED ADD PROFILE -->
+            <div class="row row-cols-1 notibar">
+                <div class="col mt-2 ms-2 p-2 bg-danger text-white rounded text-start">
+                    <i class="bi bi-x-circle ms-2"></i><span class="ms-2 mt-2">Failed to add new player profile.</span>
+                    <span class="me-2 float-end"><a class="text-decoration-none link-light" href="admin_ply_list.php">X</a></span>
+                </div>
+            </div>
+            <!-- END FAILED ADD PROFILE -->
+            <?php }
+                }
+            ?>
+
+            <h2 class="pt-3 display-6">Players List</h2>
+            <form class="form-floating mb-3" method="GET" action="admin_ply_list.php">
+    <div class="row g-2">
+        <div class="col">
+            <input type="text" class="form-control" id="firstname" name="fn" placeholder="First name"
+                <?php if(isset($_GET["search"])){?>value="<?php echo $_GET["fn"];?>" <?php } ?>>
+        </div>
+        <div class="col">
+            <input type="text" class="form-control" id="lastname" name="ln" placeholder="Last name"
+                <?php if(isset($_GET["search"])){?>value="<?php echo $_GET["ln"];?>" <?php } ?>>
+        </div>
+        <div class="col-auto">
+            <button type="submit" name="search" value="1" class="btn btn-success">Search</button>
+            <button type="reset" class="btn btn-danger" onclick="window.location='admin_ply_list.php'">
+                Clear
+            </button>
+        </div>
+    </div>
+</form>
+
+
+        </div>
+    </div>
+
+    <div class="container pt-2" id="cust-table">
+
+        <?php
+            if (!isset($_GET["search"])) {
+                // Default: Show all players
+                $search_query = "SELECT c_id, c_username, c_firstname, c_lastname, c_email FROM player WHERE c_type = 'PLY';";
+            } else {
+                $search_fn = isset($_GET["fn"]) ? $_GET["fn"] : '';
+                $search_ln = isset($_GET["ln"]) ? $_GET["ln"] : '';
+            
+                // Search only by First Name & Last Name
+                $search_query = "SELECT c_id, c_username, c_firstname, c_lastname, c_email FROM player
+                WHERE c_type = 'PLY' 
+                AND c_firstname LIKE '%{$search_fn}%' 
+                AND c_lastname LIKE '%{$search_ln}%';";
+            }
+            
+            
+            $search_result = $mysqli -> query($search_query);
+            $search_numrow = $search_result -> num_rows;
+            if($search_numrow == 0){
+        ?>
+        <div class="row">
+            <div class="col mt-2 ms-2 p-2 bg-danger text-white rounded text-start">
+                <i class="bi bi-x-circle ms-2"></i><span class="ms-2 mt-2">No player found!</span>
+                <a href="admin_ply_list.php" class="text-white">Clear Search Result</a>
+            </div>
+        </div>
+        <?php } else{ ?>
+        <div class="table-responsive">
+        <table class="table rounded-5 table-light table-striped table-hover align-middle caption-top mb-5">
+            <caption><?php echo $search_numrow;?> player(s) <?php if(isset($_GET["search"])){?><br /><a
+                    href="admin_ply_list.php" class="text-decoration-none text-danger">Clear Search
+                    Result</a><?php } ?></caption>
+                    <thead class="bg-light">
+    <tr>        
+        <th scope="col">#</th>
+        <th scope="col">Username</th>
+        <th scope="col">First name</th>
+        <th scope="col">Last name</th>
+        <th scope="col">E-mail</th>
+        <th scope="col">Action</th>
+    </tr>
+</thead>
+<tbody>
+    <?php $i=1; while($row = $search_result -> fetch_array()){ ?>
+    <tr>
+        <th><?php echo $i++;?></th>
+        <td><?php echo $row["c_username"];?></td>
+        <td><?php echo $row["c_firstname"];?></td>
+        <td><?php echo $row["c_lastname"];?></td>
+        <td><?php echo $row["c_email"];?></td>
+        <td>
+            <a href="admin_ply_detail.php?c_id=<?php echo $row["c_id"]?>" class="btn btn-sm btn-primary">View</a>
+            <a href="admin_edit.php?c_id=<?php echo $row["c_id"]?>" class="btn btn-sm btn-outline-success">Edit</a>
+            <a href="admin_delete.php?c_id=<?php echo $row["c_id"]?>" class="btn btn-sm btn-outline-danger">Delete</a>
+        </td>
+    </tr>
+    <?php } ?>
+</tbody>
+    </table>
+        </div>
+        <?php }
+            $search_result -> free_result();
+        ?>
+    </div>
+
+    <?php include('admin_footer.php')?>
+</body>
+
+</html>
